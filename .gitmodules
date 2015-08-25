@@ -1,0 +1,3 @@
+[submodule "weemoji"]
+	path = weemoji
+	url = https://github.com/kattrali/weemoji.git
