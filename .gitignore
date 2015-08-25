@@ -1,0 +1,5 @@
+logs/*
+logs
+*.log
+script/plugins.xml.gz
+slack.cache
