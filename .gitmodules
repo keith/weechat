@@ -1,3 +1,6 @@
 [submodule "weemoji"]
 	path = weemoji
 	url = https://github.com/kattrali/weemoji.git
+[submodule "wee-slack"]
+	path = wee-slack
+	url = https://github.com/rawdigits/wee-slack.git
