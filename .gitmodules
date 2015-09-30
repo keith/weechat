@@ -4,3 +4,6 @@
 [submodule "wee-slack"]
 	path = wee-slack
 	url = https://github.com/rawdigits/wee-slack.git
+[submodule "vimmode"]
+	path = vimmode
+	url = https://github.com/GermainZ/weechat-vimode.git
