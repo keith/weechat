@@ -7,3 +7,6 @@
 [submodule "vimmode"]
 	path = vimmode
 	url = https://github.com/GermainZ/weechat-vimode.git
+[submodule "urlview"]
+	path = urlview
+	url = https://github.com/keith/urlview-weechat.git
