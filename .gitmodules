@@ -10,3 +10,6 @@
 [submodule "urlview"]
 	path = urlview
 	url = https://github.com/keith/urlview-weechat.git
+[submodule "terminal-notifier"]
+	path = terminal-notifier
+	url = https://github.com/keith/terminal-notifier-weechat.git

@@ -1,0 +1,1 @@
+../../terminal-notifier/terminal_notifier.py
