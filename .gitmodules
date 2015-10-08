@@ -13,3 +13,6 @@
 [submodule "terminal-notifier"]
 	path = terminal-notifier
 	url = https://github.com/keith/terminal-notifier-weechat.git
+[submodule "emote"]
+	path = emote
+	url = https://github.com/keith/emote-weechat.git
