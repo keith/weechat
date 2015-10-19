@@ -16,3 +16,6 @@
 [submodule "emote"]
 	path = emote
 	url = https://github.com/keith/emote-weechat.git
+[submodule "edit"]
+	path = edit
+	url = https://github.com/keith/edit-weechat.git
