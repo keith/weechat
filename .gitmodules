@@ -22,3 +22,6 @@
 [submodule "imgur"]
 	path = imgur
 	url = https://github.com/keith/imgur-weechat.git
+[submodule "giphy"]
+	path = giphy
+	url = https://github.com/keith/giphy-weechat.git
