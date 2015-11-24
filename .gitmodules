@@ -19,3 +19,6 @@
 [submodule "edit"]
 	path = edit
 	url = https://github.com/keith/edit-weechat.git
+[submodule "imgur"]
+	path = imgur
+	url = https://github.com/keith/imgur-weechat.git
