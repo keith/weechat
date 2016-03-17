@@ -998,7 +998,7 @@ sub build_buffers
 
         next if ( check_detach_buffer_immediately($buffer->{"name"}) eq 1
                  and $buffer->{"current_buffer"} eq 0
-                 and ( not exists $hotlist{$buffer->{"pointer"}} or $hotlist{$buffer->{"pointer"}} < 2) );          # checking for buffer to immediately detach
+                 and ( not exists $hotlist{$buffer->{"pointer"}} ) );          # checking for buffer to immediately detach
 
         unless ($result)
         {
