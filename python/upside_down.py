@@ -104,7 +104,7 @@ replacements = {
 
 if w.register(SCRIPT_NAME, SCRIPT_AUTHOR, SCRIPT_VERSION, SCRIPT_LICENSE,
                     SCRIPT_DESC, "", ""):
-    for option, default_value in settings.iteritems():
+    for option, default_value in settings.items():
         if not w.config_is_set_plugin(option):
             w.config_set_plugin(option, default_value)
     w.hook_command("flip",

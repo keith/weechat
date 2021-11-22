@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 #
 # UrlGrab, for weechat version >= 0.3.0
 #
@@ -107,13 +108,23 @@
 #           - Removed '/url help' command, because /help <command> is the standard way
 #  - V2.0 Xilov: replace "/url help" by "/help url"
 #  - V2.1 nand: Changed default: firefox %s to firefox '%s' (localcmd)
-#  - V2.2 Sebastien Helleu <flashcode@flashtux.org>: fix reload of config file
+#  - V2.2 Sébastien Helleu <flashcode@flashtux.org>: fix reload of config file
 #  - V2.3 nand: Allowed trailing )s for unmatched (s in URLs
 #  - V2.4 nand: Escaped URLs via URL-encoding instead of shell escaping, fixes '
 #  - V2.5 nand: Fixed some URLs that got incorrectly mangled by escaping
 #  - V2.6 nesthib: Fixed escaping of "="
 #                  Added missing quotes in default parameter (firefox '%s')
 #                  Removed the mix of tabs and spaces in the file indentation
+#  - V2.7 dobbymoodge <john.w.lamb [at] gmail . com>
+#                     ( https://github.com/dobbymoodge/ ):
+#           - Added 'copycmd' setting, users can set command to pipe into
+#             for '/url copy'
+#  - V2.8 Simmo Saan <simmo.saan@gmail.com>:
+#           - Changed print hook to ignore filtered lines
+#  - V2.9 Dominik Heidler <dominik@heidler.eu>:
+#           - Updated script for python3 support (now python2 and 3 are both supported)
+#  - V3.0 Sébastien Helleu <flashcode@flashtux.org>:
+#           - Fix python 3 compatibility (replace "has_key" by "in")
 #
 # Copyright (C) 2005 David Rubin <drubin AT smartcube dot co dot za>
 #
@@ -133,20 +144,27 @@
 # USA.
 #
 
+from __future__ import print_function
 import sys
 import os
 try:
     import weechat
     import_ok = True
 except:
-    print "This script must be run under WeeChat."
-    print "Get WeeChat now at: http://www.weechat.org/"
+    print("This script must be run under WeeChat.")
+    print("Get WeeChat now at: http://www.weechat.org/")
     import_ok = False
 import subprocess
 import time
-import urllib
+try:
+    from urllib import quote
+except ImportError:
+    from urllib.parse import quote
 import re
-from UserDict import UserDict
+try:
+    from UserDict import UserDict
+except ImportError:
+    from collections import UserDict
 
 
 octet = r'(?:2(?:[0-4]\d|5[0-5])|1\d\d|\d{1,2})'
@@ -159,7 +177,7 @@ urlRe = re.compile(r'(\w+://(?:%s|%s)(?::\d+)?(?:/[^\]>\s]*)?)' % (domain, ipAdd
 
 SCRIPT_NAME    = "urlgrab"
 SCRIPT_AUTHOR  = "David Rubin <drubin [At] smartcube [dot] co [dot] za>"
-SCRIPT_VERSION = "2.6"
+SCRIPT_VERSION = "3.0"
 SCRIPT_LICENSE = "GPL"
 SCRIPT_DESC    = "Url functionality Loggin, opening of browser, selectable links"
 CONFIG_FILE_NAME= "urlgrab"
@@ -260,6 +278,14 @@ class UrlGrabSettings(UserDict):
             '%remodecmd%'""", "", 0, 0,
             "local", "local", 0, "", "", "", "", "", "")
 
+        self.data['copycmd']=weechat.config_new_option(
+            self.config_file, section_default,
+            "copycmd", "string",
+            "Command to pipe into for 'url copy'. "
+            "E.g. to copy into the CLIPBOARD buffer "
+            "instead of PRIMARY, you can use 'xsel -b "
+            "-i' here.", "", 0, 0,
+            "xsel -i", "xsel -i", 0, "", "", "", "", "", "")
 
         self.data['localcmd']=weechat.config_new_option(
             self.config_file, section_default,
@@ -344,7 +370,7 @@ class UrlGrabber:
                                            index['buffer'], index['url']))
                 dout.close()
             except :
-                print "failed to log url check that %s is valid path" % urlGrabSettings['url_log']
+                print("failed to log url check that %s is valid path" % urlGrabSettings['url_log'])
                 pass
 
         # check for buffer
@@ -376,7 +402,7 @@ class UrlGrabber:
 
     def prnt(self, buff):
         found = True
-        if self.urls.has_key(buff):
+        if buff in self.urls:
             if len(self.urls[buff]) > 0:
                 i = 1
                 for url in self.urls[buff]:
@@ -393,9 +419,9 @@ class UrlGrabber:
         if not found:
             urlGrabPrint(buff + ": no entries")
 
-def urlGrabCheckMsgline(bufferp, message):
+def urlGrabCheckMsgline(bufferp, message, isdisplayed):
     global urlGrab, max_buffer_length
-    if not message:
+    if not message or isdisplayed == 0:
         return
     # Ignore output from 'tinyurl.py' and our selfs
     if ( message.startswith( "[AKA] http://tinyurl.com" ) or
@@ -411,7 +437,7 @@ def urlGrabCheckMsgline(bufferp, message):
 
 
 def urlGrabCheck(data, bufferp, uber_empty, tagsn, isdisplayed, ishilight, prefix, message):
-    urlGrabCheckMsgline(hashBufferName(bufferp), message)
+    urlGrabCheckMsgline(hashBufferName(bufferp), message, isdisplayed)
     return weechat.WEECHAT_RC_OK
 
 def urlGrabCopy(bufferd, index):
@@ -429,7 +455,7 @@ def urlGrabCopy(bufferd, index):
         urlGrabPrint("No URL found - Invalid index")
     else:
         try:
-            pipe = os.popen("xsel -i","w")
+            pipe = os.popen(urlGrabSettings['copycmd'],"w")
             pipe.write(url)
             pipe.close()
             urlGrabPrint("Url: %s gone to clipboard." % url)
@@ -438,7 +464,7 @@ def urlGrabCopy(bufferd, index):
 
 def urlGrabOpenUrl(url):
     global urlGrab, urlGrabSettings
-    argl = urlGrabSettings.createCmd( urllib.quote(url, '/:#%?&+=') )
+    argl = urlGrabSettings.createCmd( quote(url, '/:#%?&+=') )
     weechat.hook_process(argl,60000, "ug_open_cb", "")
 
 def ug_open_cb(data, command, code, out, err):
@@ -670,4 +696,4 @@ if ( import_ok and
     weechat.hook_completion("urlgrab_urls", "list of URLs",
                                 "completion_urls_cb", "")
 else:
-    print "failed to load weechat"
+    print("failed to load weechat")
