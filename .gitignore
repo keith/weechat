@@ -3,3 +3,4 @@ logs
 *.log
 script/plugins.xml.gz
 slack.cache
+sec.conf
